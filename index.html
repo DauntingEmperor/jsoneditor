@@ -34,6 +34,7 @@
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
+            overflow-y: auto;
         }
         .app-list h2, .editor h1, .editor h2 {
             text-align: center;
@@ -42,7 +43,6 @@
             list-style-type: none;
             padding: 0;
             flex-grow: 1;
-            overflow-y: auto;
         }
         .app-list li {
             padding: 10px;
@@ -160,6 +160,17 @@
 <script>
     let appsData = [];
     let selectedAppIndex = null;
+
+    // Load existing apps from JSON
+    fetch('https://raw.githubusercontent.com/DauntingEmperor/winsource/main/source/v2source.json')
+        .then(response => response.json())
+        .then(data => {
+            appsData = data;
+            renderAppList();
+        })
+        .catch(error => {
+            console.error('Error fetching app data:', error);
+        });
 
     document.getElementById('addAppButton').addEventListener('click', () => {
         document.getElementById('appFormContainer').style.display = 'block';
