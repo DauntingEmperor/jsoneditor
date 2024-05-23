@@ -275,7 +275,7 @@
 
         appsData.forEach((app, index) => {
             const li = document.createElement('li');
-            li.textContent = app.name + (app.admin ? ' 🛡' : '');
+            li.textContent = app.name + (app.admin ? ' 🛡️' : '');
             li.addEventListener('click', () => {
                 document.getElementById('appFormContainer').style.display = 'block';
                 loadAppIntoForm(app, index);
