@@ -10,18 +10,35 @@
             background-color: #f5f5f5;
             color: #333;
             padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
             display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 80%;
+            max-width: 1200px;
+            height: 80%;
+        }
+        .app-list, .editor {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
         }
         .app-list {
-            width: 25%;
-            background-color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-            height: 80vh;
+            background-color: #0078D7;
+            color: white;
+            width: 30%;
+        }
+        .app-list h2, .editor h1, .editor h2 {
+            text-align: center;
         }
         .app-list ul {
             list-style-type: none;
@@ -34,11 +51,22 @@
             transition: background-color 0.3s;
         }
         .app-list li:hover {
-            background-color: #f0f0f0;
+            background-color: #005A9E;
         }
-        .editor {
-            width: 75%;
-            padding: 20px;
+        .app-list button, button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #004C87;
+            color: white;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #003366;
+            transform: translateY(-2px);
         }
         .form-group {
             margin-bottom: 15px;
@@ -51,7 +79,8 @@
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .form-group textarea {
             resize: vertical;
@@ -59,19 +88,7 @@
         .buttons {
             display: flex;
             justify-content: space-between;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #0078D7;
-            color: white;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-        button:hover {
-            background-color: #005A9E;
-            transform: translateY(-2px);
+            gap: 10px;
         }
     </style>
 </head>
@@ -82,6 +99,7 @@
         <h2>App List</h2>
         <ul id="appList"></ul>
         <button id="addAppButton">+ Add App</button>
+        <button id="combineJsonButton">Combine JSON</button>
     </div>
     <div class="editor">
         <h1>App JSON Editor</h1>
@@ -118,20 +136,25 @@
                     <option value="true">True</option>
                 </select>
             </div>
-            <button id="saveAppButton">Save App</button>
+            <div class="buttons">
+                <button id="saveAppButton">Save App</button>
+                <button id="deleteAppButton">Delete App</button>
+            </div>
         </div>
         <div class="buttons">
-            <button id="saveJsonButton">Save JSON</button>
+            <button id="saveJsonButton">Save All JSON</button>
         </div>
     </div>
 </div>
 
 <script>
     let appsData = [];
+    let selectedAppIndex = null;
 
     document.getElementById('addAppButton').addEventListener('click', () => {
         document.getElementById('appFormContainer').style.display = 'block';
         clearForm();
+        selectedAppIndex = null;
     });
 
     document.getElementById('saveAppButton').addEventListener('click', () => {
@@ -145,16 +168,34 @@
             admin: document.getElementById('appAdmin').value === 'true'
         };
 
-        const existingAppIndex = appsData.findIndex(a => a.name === app.name);
-        if (existingAppIndex >= 0) {
-            appsData[existingAppIndex] = app;
+        if (selectedAppIndex !== null) {
+            appsData[selectedAppIndex] = app;
         } else {
             appsData.push(app);
         }
 
+        const appJson = JSON.stringify(app, null, 4);
+        const blob = new Blob([appJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${app.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
         clearForm();
         document.getElementById('appFormContainer').style.display = 'none';
         renderAppList();
+    });
+
+    document.getElementById('deleteAppButton').addEventListener('click', () => {
+        if (selectedAppIndex !== null) {
+            appsData.splice(selectedAppIndex, 1);
+            selectedAppIndex = null;
+            clearForm();
+            document.getElementById('appFormContainer').style.display = 'none';
+            renderAppList();
+        }
     });
 
     document.getElementById('saveJsonButton').addEventListener('click', () => {
@@ -168,21 +209,61 @@
         URL.revokeObjectURL(url);
     });
 
+    document.getElementById('combineJsonButton').addEventListener('click', () => {
+        const jsonInput1 = prompt('Paste the first JSON:');
+        const jsonInput2 = prompt('Paste the second JSON:');
+
+        if (!jsonInput1 || !jsonInput2) {
+            alert('Both JSON inputs are required.');
+            return;
+        }
+
+        let json1, json2;
+
+        try {
+            json1 = JSON.parse(jsonInput1);
+            json2 = JSON.parse(jsonInput2);
+        } catch (error) {
+            alert('Invalid JSON format.');
+            return;
+        }
+
+        const combinedApps = [...json1, ...json2].reduce((acc, app) => {
+            if (!acc.some(existingApp => existingApp.name === app.name)) {
+                acc.push(app);
+            }
+            return acc;
+        }, []);
+
+        const combinedJson = JSON.stringify(combinedApps, null, 4);
+        const blob = new Blob([combinedJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'combined_apps.json';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        appsData = combinedApps;
+        renderAppList();
+    });
+
     function renderAppList() {
         const appList = document.getElementById('appList');
         appList.innerHTML = '';
-        appsData.forEach(app => {
+        appsData.forEach((app, index) => {
             const li = document.createElement('li');
-            li.textContent = app.name;
+            li.textContent = app.name + (app.admin ? ' 🛡' : '');
             li.addEventListener('click', () => {
                 document.getElementById('appFormContainer').style.display = 'block';
-                loadAppIntoForm(app);
+                loadAppIntoForm(app, index);
             });
             appList.appendChild(li);
         });
     }
 
-    function loadAppIntoForm(app) {
+    function loadAppIntoForm(app, index) {
+        selectedAppIndex = index;
         document.getElementById('appName').value = app.name;
         document.getElementById('appDescription').value = app.description;
         document.getElementById('appIcon').value = app.app_icon;
@@ -201,17 +282,9 @@
         document.getElementById('appTabs').value = '';
         document.getElementById('appAdmin').value = 'false';
     }
+    
 
-    // Fetch existing JSON data from the GitHub repository
-    fetch('https://raw.githubusercontent.com/DauntingEmperor/winsource/main/source/v2source.json')
-        .then(response => response.json())
-        .then(data => {
-            appsData = data;
-            renderAppList();
-        })
-        .catch(error => {
-            console.error('Error fetching app data:', error);
-        });
+    renderAppList();
 </script>
 
 </body>
