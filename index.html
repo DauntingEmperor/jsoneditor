@@ -62,6 +62,22 @@
         #app-list div:hover {
             background-color: #f0f0f0;
         }
+        .app-form {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .app-form label, .app-form input {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .app-form button {
+            display: block;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +97,14 @@
 
         <button id="add-app-button">Add App</button>
         <button id="save-button">Save</button>
+        
+        <div class="app-form" id="app-form">
+            <label for="app-name">App Name:</label>
+            <input type="text" id="app-name" placeholder="Enter app name">
+            <label for="app-admin">Admin App:</label>
+            <input type="checkbox" id="app-admin">
+            <button id="add-app-form">Add App</button>
+        </div>
     </div>
 
     <script>
@@ -104,7 +128,7 @@
 
             appsData.forEach(app => {
                 const listItem = document.createElement('div');
-                listItem.textContent = app.name;
+                listItem.textContent = app.name + (app.admin ? ' 🛡' : '');
                 listItem.addEventListener('click', () => {
                     // Handle selecting an app
                 });
@@ -141,8 +165,31 @@
 
         // Event listener for the add app button
         document.getElementById('add-app-button').addEventListener('click', function() {
-            // Logic to open a form or modal to add a new app
-            console.log('Adding a new app');
+            // Show the app form
+            document.getElementById('app-form').style.display = 'block';
+        });
+
+        // Event listener for the add app form button
+        document.getElementById('add-app-form').addEventListener('click', function() {
+            // Get app details from the form
+            var appName = document.getElementById('app-name').value;
+            var isAdmin = document.getElementById('app-admin').checked;
+
+            // Create app object
+            var newApp = {
+                name: appName,
+                admin: isAdmin
+                // Add other properties as needed
+            };
+
+            // Add the new app to the appsData array
+            appsData.push(newApp);
+
+            // Re-render the app list
+            renderAppList();
+
+            // Hide the app form
+            document.getElementById('app-form').style.display = 'none';
         });
     </script>
 </body>
