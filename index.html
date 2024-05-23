@@ -3,336 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Editor for Apps</title>
+    <title>App JSON Editor</title>
     <style>
+        /* Your CSS styles here */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f5f5f5;
-            color: #333;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            padding: 0;
         }
         .container {
-            display: flex;
-            flex-direction: row;
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            width: 80%;
-            height: 80%;
-        }
-        .app-list {
-            background-color: #0078D7;
-            color: white;
+            max-width: 800px;
+            margin: 20px auto;
             padding: 20px;
-            width: 30%;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-        .app-list h2, .editor h1, .editor h2 {
-            text-align: center;
-        }
-        .app-list ul {
-            list-style-type: none;
-            padding: 0;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        .app-list li {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #ccc;
-            transition: background-color 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .app-list li:hover {
-            background-color: #005A9E;
-        }
-        .app-list button, button {
-            padding: 10px;
-            border: none;
+            background-color: #fff;
             border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        select, button {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
-            background-color: #004C87;
-            color: white;
-            transition: background-color 0.3s, transform 0.3s;
-            margin-top: 20px;
-            width: 100%;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #003366;
-            transform: translateY(-2px);
+            background-color: #0056b3;
         }
-        .editor {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
+        #app-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .form-group textarea {
-            resize: vertical;
+        #app-list div {
+            cursor: pointer;
+            padding: 5px;
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
         }
-        .buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        #appFormContainer {
-            display: none;
-        }
-        .app-card-preview {
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #fff;
-            margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .app-card-preview img {
-            max-width: 100px;
-            margin-bottom: 10px;
-        }
-        .app-card-preview h3 {
-            margin: 0 0 10px 0;
-        }
-        .app-card-preview p {
-            text-align: center;
+        #app-list div:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="app-list">
-        <h2>App List</h2>
-        <ul id="appList"></ul>
-        <button id="addAppButton">+ Add App</button>
-        <button id="combineJsonButton">Combine JSON</button>
-    </div>
-    <div class="editor">
+    <div class="container">
         <h1>App JSON Editor</h1>
-        <div id="appFormContainer">
-            <h2>Add/Edit App</h2>
-            <div class="form-group">
-                <label for="appName">App Name</label>
-                <input type="text" id="appName" required>
-            </div>
-            <div class="form-group">
-                <label for="appDescription">Description</label>
-                <textarea id="appDescription" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="appIcon">App Icon URL</label>
-                <input type="text" id="appIcon" required>
-            </div>
-            <div class="form-group">
-                <label for="appDownloadLink">Download Link</label>
-                <input type="text" id="appDownloadLink" required>
-            </div>
-            <div class="form-group">
-                <label for="appScreenshots">Screenshots (comma separated URLs)</label>
-                <textarea id="appScreenshots"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="appTabs">Tabs (comma separated)</label>
-                <input type="text" id="appTabs" required>
-            </div>
-            <div class="form-group">
-                <label for="appAdmin">Admin</label>
-                <select id="appAdmin">
-                    <option value="false">False</option>
-                    <option value="true">True</option>
-                </select>
-            </div>
-            <div class="buttons">
-                <button id="saveAppButton">Save App</button>
-                <button id="deleteAppButton">Delete App</button>
-            </div>
+        <div>
+            <label for="json-choice">Choose JSON:</label>
+            <select id="json-choice">
+                <option value="current">Add to Current JSON</option>
+                <option value="new">Create New JSON</option>
+            </select>
         </div>
-        <div id="appPreviewContainer">
-            <h2>App Preview</h2>
-            <div class="app-card-preview" id="appCardPreview"></div>
+
+        <div id="app-list">
+            <!-- App list will be dynamically added here -->
         </div>
-        <div class="buttons">
-            <button id="saveJsonButton">Save All JSON</button>
-        </div>
+
+        <button id="add-app-button">Add App</button>
+        <button id="save-button">Save</button>
     </div>
-</div>
 
-<script>
-    let appsData = [];
-    let selectedAppIndex = null;
+    <script>
+        let appsData = [];
 
-    document.getElementById('addAppButton').addEventListener('click', () => {
-        document.getElementById('appFormContainer').style.display = 'block';
-        clearForm();
-        selectedAppIndex = null;
-    });
+        // Fetch JSON data from the GitHub repository
+        fetch('https://raw.githubusercontent.com/DauntingEmperor/winsource/main/source/v2source.json')
+            .then(response => response.json())
+            .then(data => {
+                appsData = data;
+                renderAppList();
+            })
+            .catch(error => {
+                console.error('Error fetching app data:', error);
+            });
 
-    document.getElementById('saveAppButton').addEventListener('click', () => {
-        const app = {
-            name: document.getElementById('appName').value,
-            description: document.getElementById('appDescription').value,
-            app_icon: document.getElementById('appIcon').value,
-            download_link: document.getElementById('appDownloadLink').value,
-            screenshots: document.getElementById('appScreenshots').value.split(',').map(url => url.trim()),
-            tabs: document.getElementById('appTabs').value.split(',').map(tab => tab.trim()),
-            admin: document.getElementById('appAdmin').value === 'true'
-        };
+        // Function to render the list of apps
+        function renderAppList() {
+            const appList = document.getElementById('app-list');
+            appList.innerHTML = '';
 
-        if (selectedAppIndex !== null) {
-            appsData[selectedAppIndex] = app;
-        } else {
-            appsData.push(app);
+            appsData.forEach(app => {
+                const listItem = document.createElement('div');
+                listItem.textContent = app.name;
+                listItem.addEventListener('click', () => {
+                    // Handle selecting an app
+                });
+                appList.appendChild(listItem);
+            });
         }
 
-        const appJson = JSON.stringify(app, null, 4);
-        const blob = new Blob([appJson], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${app.name}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        clearForm();
-        document.getElementById('appFormContainer').style.display = 'none';
-        renderAppList();
-    });
-
-    document.getElementById('deleteAppButton').addEventListener('click', () => {
-        if (selectedAppIndex !== null) {
-            appsData.splice(selectedAppIndex, 1);
-            selectedAppIndex = null;
-            clearForm();
-            document.getElementById('appFormContainer').style.display = 'none';
-            renderAppList();
-        }
-    });
-
-    document.getElementById('saveJsonButton').addEventListener('click', () => {
-        const json = JSON.stringify(appsData, null, 4);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'apps.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('combineJsonButton').addEventListener('click', () => {
-        const jsonInput1 = prompt('Paste the first JSON:');
-        const jsonInput2 = prompt('Paste the second JSON:');
-
-        if (!jsonInput1 || !jsonInput2) {
-            alert('Both JSON inputs are required.');
-            return;
+        // Function to save the modified JSON with new apps added to the current JSON
+        function saveCurrentJSON() {
+            // Save the modified JSON
+            console.log('Saving current JSON:', appsData);
         }
 
-        let json1, json2;
-
-        try {
-            json1 = JSON.parse(jsonInput1);
-        } catch (error) {
-            alert('Invalid JSON format for the first input.');
-            return;
+        // Function to save a new JSON file with only the new apps
+        function saveNewJSON(newAppsData) {
+            // Save the new JSON
+            console.log('Saving new JSON:', newAppsData);
         }
 
-        try {
-            json2 = JSON.parse(jsonInput2);
-        } catch (error) {
-            alert('Invalid JSON format for the second input.');
-            return;
-        }
+        // Event listener for the save button
+        document.getElementById('save-button').addEventListener('click', function() {
+            var choice = document.getElementById('json-choice').value;
 
-        const combinedJson = combineJson(json1, json2);
-
-        const blob = new Blob([JSON.stringify(combinedJson, null, 4)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'combined.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-    function combineJson(json1, json2) {
-        const mergedJson = [...json1];
-
-        json2.forEach(app2 => {
-            const exists = json1.some(app1 => app1.name === app2.name);
-            if (!exists) {
-                mergedJson.push(app2);
+            if (choice === 'current') {
+                // Save the modified JSON with new apps added to the current JSON
+                saveCurrentJSON();
+            } else if (choice === 'new') {
+                // Create a new JSON with only the new apps
+                var newJSON = [newAppData]; // Replace newAppData with the data for the new app
+                // Save the new JSON
+                saveNewJSON(newJSON);
             }
         });
 
-        return mergedJson;
-    }
-
-    function renderAppList() {
-        const appList = document.getElementById('appList');
-        appList.innerHTML = '';
-
-        appsData.forEach((app, index) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = app.name + (app.admin ? ' 🛡' : '');
-            listItem.addEventListener('click', () => {
-                selectedAppIndex = index;
-                populateForm(app);
-            });
-            appList.appendChild(listItem);
+        // Event listener for the add app button
+        document.getElementById('add-app-button').addEventListener('click', function() {
+            // Logic to open a form or modal to add a new app
+            console.log('Adding a new app');
         });
-    }
-
-    function populateForm(app) {
-        document.getElementById('appName').value = app.name;
-        document.getElementById('appDescription').value = app.description;
-        document.getElementById('appIcon').value = app.app_icon;
-        document.getElementById('appDownloadLink').value = app.download_link;
-        document.getElementById('appScreenshots').value = app.screenshots.join(', ');
-        document.getElementById('appTabs').value = app.tabs.join(', ');
-        document.getElementById('appAdmin').value = app.admin.toString();
-    }
-
-    function clearForm() {
-        document.getElementById('appName').value = '';
-        document.getElementById('appDescription').value = '';
-        document.getElementById('appIcon').value = '';
-        document.getElementById('appDownloadLink').value = '';
-        document.getElementById('appScreenshots').value = '';
-        document.getElementById('appTabs').value = '';
-        document.getElementById('appAdmin').value = 'false';
-    }
-
-    renderAppList();
-</script>
-
+    </script>
 </body>
 </html>
