@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App JSON Editor</title>
     <style>
-        /* Your CSS styles here */
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             margin: 0;
             padding: 0;
         }
+
         .container {
             max-width: 800px;
             margin: 20px auto;
@@ -20,177 +20,157 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
             text-align: center;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
+
         label {
+            display: block;
             font-weight: bold;
+            margin-bottom: 5px;
         }
-        select, button {
+
+        input[type="text"],
+        input[type="checkbox"] {
+            width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
-            cursor: pointer;
+            box-sizing: border-box;
         }
-        button {
+
+        .button-container {
+            text-align: center;
+        }
+
+        .button {
+            padding: 10px 20px;
             background-color: #007bff;
             color: #fff;
             border: none;
+            border-radius: 5px;
+            cursor: pointer;
             transition: background-color 0.3s;
         }
-        button:hover {
+
+        .button:hover {
             background-color: #0056b3;
         }
-        #app-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-        }
-        #app-list div {
-            cursor: pointer;
-            padding: 5px;
-            margin-bottom: 5px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        #app-list div:hover {
-            background-color: #f0f0f0;
-        }
-        .app-form {
-            display: none;
+
+        .app-list {
             margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
         }
-        .app-form label, .app-form input {
-            display: block;
+
+        .app-item {
             margin-bottom: 10px;
         }
-        .app-form button {
-            display: block;
-            margin-top: 10px;
+
+        .app-item input[type="checkbox"] {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>App JSON Editor</h1>
-        <div>
-            <label for="json-choice">Choose JSON:</label>
-            <select id="json-choice">
-                <option value="current">Add to Current JSON</option>
-                <option value="new">Create New JSON</option>
-            </select>
-        </div>
 
-        <div id="app-list">
-            <!-- App list will be dynamically added here -->
-        </div>
+<div class="container">
+    <h1>App JSON Editor</h1>
 
-        <button id="add-app-button">Add App</button>
-        <button id="save-button">Save</button>
-        
-        <div class="app-form" id="app-form">
-            <label for="app-name">App Name:</label>
-            <input type="text" id="app-name" placeholder="Enter app name">
-            <label for="app-admin">Admin App:</label>
-            <input type="checkbox" id="app-admin">
-            <button id="add-app-form">Add App</button>
-        </div>
+    <div class="form-group">
+        <label for="app-name">App Name:</label>
+        <input type="text" id="app-name">
     </div>
 
-    <script>
-        let appsData = [];
+    <div class="form-group">
+        <label for="app-admin">Is Admin:</label>
+        <input type="checkbox" id="app-admin">
+    </div>
 
-        // Fetch JSON data from the GitHub repository
-        fetch('https://raw.githubusercontent.com/DauntingEmperor/winsource/main/source/v2source.json')
-            .then(response => response.json())
-            .then(data => {
-                appsData = data;
-                renderAppList();
-            })
-            .catch(error => {
-                console.error('Error fetching app data:', error);
-            });
+    <div class="button-container">
+        <button class="button" id="add-app-button">Add App</button>
+    </div>
 
-        // Function to render the list of apps
-        function renderAppList() {
-            const appList = document.getElementById('app-list');
-            appList.innerHTML = '';
+    <div id="app-list" class="app-list">
+        <!-- App list will be dynamically generated here -->
+    </div>
 
-            appsData.forEach(app => {
-                const listItem = document.createElement('div');
-                listItem.textContent = app.name + (app.admin ? ' 🛡' : '');
-                listItem.addEventListener('click', () => {
-                    // Handle selecting an app
-                });
-                appList.appendChild(listItem);
-            });
-        }
+    <div id="app-form" style="display: none;">
+        <div class="form-group">
+            <label for="app-name-edit">App Name:</label>
+            <input type="text" id="app-name-edit">
+        </div>
+        <div class="form-group">
+            <label for="app-admin-edit">Is Admin:</label>
+            <input type="checkbox" id="app-admin-edit">
+        </div>
+        <div class="button-container">
+            <button class="button" id="save-app-button">Save App</button>
+            <button class="button" id="cancel-app-button">Cancel</button>
+        </div>
+    </div>
+</div>
 
-        // Function to save the modified JSON with new apps added to the current JSON
-        function saveCurrentJSON() {
-            // Save the modified JSON
-            console.log('Saving current JSON:', appsData);
-        }
+<script>
+    let appsData = []; // Placeholder for app data
 
-        // Function to save a new JSON file with only the new apps
-        function saveNewJSON(newAppsData) {
-            // Save the new JSON
-            console.log('Saving new JSON:', newAppsData);
-        }
+    // Function to render the app list
+    function renderAppList() {
+        const appListContainer = document.getElementById('app-list');
+        appListContainer.innerHTML = ''; // Clear existing list
 
-        // Event listener for the save button
-        document.getElementById('save-button').addEventListener('click', function() {
-            var choice = document.getElementById('json-choice').value;
-
-            if (choice === 'current') {
-                // Save the modified JSON with new apps added to the current JSON
-                saveCurrentJSON();
-            } else if (choice === 'new') {
-                // Create a new JSON with only the new apps
-                var newJSON = [newAppData]; // Replace newAppData with the data for the new app
-                // Save the new JSON
-                saveNewJSON(newJSON);
-            }
+        appsData.forEach((app, index) => {
+            const appItem = document.createElement('div');
+            appItem.classList.add('app-item');
+            appItem.innerHTML = `
+                <input type="checkbox" id="app-checkbox-${index}">
+                <label for="app-checkbox-${index}">${app.name}${app.admin ? ' 🛡' : ''}</label>
+            `;
+            appListContainer.appendChild(appItem);
         });
+    }
 
-        // Event listener for the add app button
-        document.getElementById('add-app-button').addEventListener('click', function() {
-            // Show the app form
-            document.getElementById('app-form').style.display = 'block';
-        });
+    // Event listener for the add app button
+    document.getElementById('add-app-button').addEventListener('click', function() {
+        // Show the app form
+        document.getElementById('app-form').style.display = 'block';
+    });
 
-        // Event listener for the add app form button
-        document.getElementById('add-app-form').addEventListener('click', function() {
-            // Get app details from the form
-            var appName = document.getElementById('app-name').value;
-            var isAdmin = document.getElementById('app-admin').checked;
+    // Event listener for the cancel app button
+    document.getElementById('cancel-app-button').addEventListener('click', function() {
+        // Hide the app form
+        document.getElementById('app-form').style.display = 'none';
+    });
 
-            // Create app object
-            var newApp = {
-                name: appName,
-                admin: isAdmin
-                // Add other properties as needed
-            };
+    // Event listener for the save app button
+    document.getElementById('save-app-button').addEventListener('click', function() {
+        // Get app details from the form
+        var appName = document.getElementById('app-name-edit').value;
+        var isAdmin = document.getElementById('app-admin-edit').checked;
 
-            // Add the new app to the appsData array
-            appsData.push(newApp);
+        // Create app object
+        var newApp = {
+            name: appName,
+            admin: isAdmin
+            // Add other properties as needed
+        };
 
-            // Re-render the app list
-            renderAppList();
+        // Add the new app to the appsData array
+        appsData.push(newApp);
 
-            // Hide the app form
-            document.getElementById('app-form').style.display = 'none';
-        });
-    </script>
+        // Re-render the app list
+        renderAppList();
+
+        // Hide the app form
+        document.getElementById('app-form').style.display = 'none';
+    });
+</script>
+
 </body>
 </html>
