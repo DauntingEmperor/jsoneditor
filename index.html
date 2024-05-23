@@ -3,173 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App JSON Editor</title>
+    <title>JSON Editor for Apps</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
+            color: #333;
             margin: 0;
-            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
         }
-
         .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 80%;
+            height: 80%;
         }
-
-        h1 {
+        .app-list {
+            background-color: #0078D7;
+            color: white;
+            padding: 20px;
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        .app-list h2, .editor h1, .editor h2 {
             text-align: center;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        .app-list ul {
+            list-style-type: none;
+            padding: 0;
+            flex-grow: 1;
+            overflow-y: auto;
         }
-
-        label {
+        .app-list li {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ccc;
+            transition: background-color 0.3s;
+        }
+        .app-list li:hover {
+            background-color: #005A9E;
+        }
+        .app-list button, button {
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #004C87;
+            color: white;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #003366;
+            transform: translateY(-2px);
+        }
+        .editor {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
             display: block;
-            font-weight: bold;
             margin-bottom: 5px;
         }
-
-        input[type="text"],
-        input[type="checkbox"] {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
-        .button-container {
-            text-align: center;
+        .form-group textarea {
+            resize: vertical;
         }
-
-        .button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
         }
-
-        .button:hover {
-            background-color: #0056b3;
-        }
-
-        .app-list {
-            margin-top: 20px;
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-        }
-
-        .app-item {
-            margin-bottom: 10px;
-        }
-
-        .app-item input[type="checkbox"] {
-            margin-right: 10px;
+        #appFormContainer {
+            display: none;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>App JSON Editor</h1>
-
-    <div class="form-group">
-        <label for="app-name">App Name:</label>
-        <input type="text" id="app-name">
+    <div class="app-list">
+        <h2>App List</h2>
+        <ul id="appList"></ul>
+        <button id="addAppButton">+ Add App</button>
+        <button id="combineJsonButton">Combine JSON</button>
     </div>
-
-    <div class="form-group">
-        <label for="app-admin">Is Admin:</label>
-        <input type="checkbox" id="app-admin">
-    </div>
-
-    <div class="button-container">
-        <button class="button" id="add-app-button">Add App</button>
-    </div>
-
-    <div id="app-list" class="app-list">
-        <!-- App list will be dynamically generated here -->
-    </div>
-
-    <div id="app-form" style="display: none;">
-        <div class="form-group">
-            <label for="app-name-edit">App Name:</label>
-            <input type="text" id="app-name-edit">
+    <div class="editor">
+        <h1>App JSON Editor</h1>
+        <div id="appFormContainer">
+            <h2>Add/Edit App</h2>
+            <div class="form-group">
+                <label for="appName">App Name</label>
+                <input type="text" id="appName" required>
+            </div>
+            <div class="form-group">
+                <label for="appDescription">Description</label>
+                <textarea id="appDescription" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="appIcon">App Icon URL</label>
+                <input type="text" id="appIcon" required>
+            </div>
+            <div class="form-group">
+                <label for="appDownloadLink">Download Link</label>
+                <input type="text" id="appDownloadLink" required>
+            </div>
+            <div class="form-group">
+                <label for="appScreenshots">Screenshots (comma separated URLs)</label>
+                <textarea id="appScreenshots"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="appTabs">Tabs (comma separated)</label>
+                <input type="text" id="appTabs" required>
+            </div>
+            <div class="form-group">
+                <label for="appAdmin">Admin</label>
+                <select id="appAdmin">
+                    <option value="false">False</option>
+                    <option value="true">True</option>
+                </select>
+            </div>
+            <div class="buttons">
+                <button id="saveAppButton">Save App</button>
+                <button id="deleteAppButton">Delete App</button>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="app-admin-edit">Is Admin:</label>
-            <input type="checkbox" id="app-admin-edit">
-        </div>
-        <div class="button-container">
-            <button class="button" id="save-app-button">Save App</button>
-            <button class="button" id="cancel-app-button">Cancel</button>
+        <div class="buttons">
+            <button id="saveJsonButton">Save All JSON</button>
         </div>
     </div>
 </div>
 
 <script>
-    let appsData = []; // Placeholder for app data
+    let appsData = [];
+    let selectedAppIndex = null;
 
-    // Function to render the app list
+    document.getElementById('addAppButton').addEventListener('click', () => {
+        document.getElementById('appFormContainer').style.display = 'block';
+        clearForm();
+        selectedAppIndex = null;
+    });
+
+    document.getElementById('saveAppButton').addEventListener('click', () => {
+        const app = {
+            name: document.getElementById('appName').value,
+            description: document.getElementById('appDescription').value,
+            app_icon: document.getElementById('appIcon').value,
+            download_link: document.getElementById('appDownloadLink').value,
+            screenshots: document.getElementById('appScreenshots').value.split(',').map(url => url.trim()),
+            tabs: document.getElementById('appTabs').value.split(',').map(tab => tab.trim()),
+            admin: document.getElementById('appAdmin').value === 'true'
+        };
+
+        if (selectedAppIndex !== null) {
+            appsData[selectedAppIndex] = app;
+        } else {
+            appsData.push(app);
+        }
+
+        const appJson = JSON.stringify(app, null, 4);
+        const blob = new Blob([appJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${app.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        clearForm();
+        document.getElementById('appFormContainer').style.display = 'none';
+        renderAppList();
+    });
+
+    document.getElementById('deleteAppButton').addEventListener('click', () => {
+        if (selectedAppIndex !== null) {
+            appsData.splice(selectedAppIndex, 1);
+            selectedAppIndex = null;
+            clearForm();
+            document.getElementById('appFormContainer').style.display = 'none';
+            renderAppList();
+        }
+    });
+
+    document.getElementById('saveJsonButton').addEventListener('click', () => {
+        const json = JSON.stringify(appsData, null, 4);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'apps.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('combineJsonButton').addEventListener('click', () => {
+        const jsonInput1 = prompt('Paste the first JSON:');
+        const jsonInput2 = prompt('Paste the second JSON:');
+
+        if (!jsonInput1 || !jsonInput2) {
+            alert('Both JSON inputs are required.');
+            return;
+        }
+
+        let json1, json2;
+
+        try {
+            json1 = JSON.parse(jsonInput1);
+            json2 = JSON.parse(jsonInput2);
+        } catch (error) {
+            alert('Invalid JSON format.');
+            return;
+        }
+
+        const combinedApps = [...json1, ...json2].reduce((acc, app) => {
+            if (!acc.some(existingApp => existingApp.name === app.name)) {
+                acc.push(app);
+            }
+            return acc;
+        }, []);
+
+        const combinedJson = JSON.stringify(combinedApps, null, 4);
+        const blob = new Blob([combinedJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'combined_apps.json';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        appsData = combinedApps;
+        renderAppList();
+    });
+
     function renderAppList() {
-        const appListContainer = document.getElementById('app-list');
-        appListContainer.innerHTML = ''; // Clear existing list
+        const appList = document.getElementById('appList');
+        appList.innerHTML = '';
 
         appsData.forEach((app, index) => {
-            const appItem = document.createElement('div');
-            appItem.classList.add('app-item');
-            appItem.innerHTML = `
-                <input type="checkbox" id="app-checkbox-${index}">
-                <label for="app-checkbox-${index}">${app.name}${app.admin ? ' 🛡' : ''}</label>
-            `;
-            appListContainer.appendChild(appItem);
+            const li = document.createElement('li');
+            li.textContent = app.name + (app.admin ? ' 🛡' : '');
+            li.addEventListener('click', () => {
+                document.getElementById('appFormContainer').style.display = 'block';
+                loadAppIntoForm(app, index);
+            });
+            appList.appendChild(li);
         });
     }
 
-    // Event listener for the add app button
-    document.getElementById('add-app-button').addEventListener('click', function() {
-        // Show the app form
-        document.getElementById('app-form').style.display = 'block';
-    });
+    function loadAppIntoForm(app, index) {
+        selectedAppIndex = index;
+        document.getElementById('appName').value = app.name;
+        document.getElementById('appDescription').value = app.description;
+        document.getElementById('appIcon').value = app.app_icon;
+        document.getElementById('appDownloadLink').value = app.download_link;
+        document.getElementById('appScreenshots').value = app.screenshots.join(', ');
+        document.getElementById('appTabs').value = app.tabs.join(', ');
+        document.getElementById('appAdmin').value = app.admin.toString();
+    }
 
-    // Event listener for the cancel app button
-    document.getElementById('cancel-app-button').addEventListener('click', function() {
-        // Hide the app form
-        document.getElementById('app-form').style.display = 'none';
-    });
+    function clearForm() {
+        document.getElementById('appName').value = '';
+        document.getElementById('appDescription').value = '';
+        document.getElementById('appIcon').value = '';
+        document.getElementById('appDownloadLink').value = '';
+        document.getElementById('appScreenshots').value = '';
+        document.getElementById('appTabs').value = '';
+        document.getElementById('appAdmin').value = 'false';
+    }
 
-    // Event listener for the save app button
-    document.getElementById('save-app-button').addEventListener('click', function() {
-        // Get app details from the form
-        var appName = document.getElementById('app-name-edit').value;
-        var isAdmin = document.getElementById('app-admin-edit').checked;
-
-        // Create app object
-        var newApp = {
-            name: appName,
-            admin: isAdmin
-            // Add other properties as needed
-        };
-
-        // Add the new app to the appsData array
-        appsData.push(newApp);
-
-        // Re-render the app list
-        renderAppList();
-
-        // Hide the app form
-        document.getElementById('app-form').style.display = 'none';
-    });
+    renderAppList();
 </script>
 
 </body>
