@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Editor for Apps</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #0078D7;
+            color: white;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        button:hover {
+            background-color: #005A9E;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>App JSON Editor</h1>
+    <div class="buttons">
+        <button id="addAppButton">+ Add App</button>
+        <button id="saveJsonButton">Save JSON</button>
+    </div>
+    <div id="appFormContainer" style="display:none;">
+        <h2>Add New App</h2>
+        <div class="form-group">
+            <label for="appName">App Name</label>
+            <input type="text" id="appName" required>
+        </div>
+        <div class="form-group">
+            <label for="appDescription">Description</label>
+            <textarea id="appDescription" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="appIcon">App Icon URL</label>
+            <input type="text" id="appIcon" required>
+        </div>
+        <div class="form-group">
+            <label for="appDownloadLink">Download Link</label>
+            <input type="text" id="appDownloadLink" required>
+        </div>
+        <div class="form-group">
+            <label for="appScreenshots">Screenshots (comma separated URLs)</label>
+            <textarea id="appScreenshots"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="appTabs">Tabs (comma separated)</label>
+            <input type="text" id="appTabs" required>
+        </div>
+        <div class="form-group">
+            <label for="appAdmin">Admin</label>
+            <select id="appAdmin">
+                <option value="false">False</option>
+                <option value="true">True</option>
+            </select>
+        </div>
+        <button id="saveAppButton">Save App</button>
+    </div>
+</div>
+
+<script>
+    let appsData = [];
+
+    document.getElementById('addAppButton').addEventListener('click', () => {
+        document.getElementById('appFormContainer').style.display = 'block';
+    });
+
+    document.getElementById('saveAppButton').addEventListener('click', () => {
+        const app = {
+            name: document.getElementById('appName').value,
+            description: document.getElementById('appDescription').value,
+            app_icon: document.getElementById('appIcon').value,
+            download_link: document.getElementById('appDownloadLink').value,
+            screenshots: document.getElementById('appScreenshots').value.split(',').map(url => url.trim()),
+            tabs: document.getElementById('appTabs').value.split(',').map(tab => tab.trim()),
+            admin: document.getElementById('appAdmin').value === 'true'
+        };
+
+        appsData.push(app);
+        document.getElementById('appFormContainer').reset();
+        document.getElementById('appFormContainer').style.display = 'none';
+    });
+
+    document.getElementById('saveJsonButton').addEventListener('click', () => {
+        const json = JSON.stringify(appsData, null, 4);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'apps.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Fetch existing JSON data from the GitHub repository
+    fetch('https://raw.githubusercontent.com/DauntingEmperor/winsource/main/source/v2source.json')
+        .then(response => response.json())
+        .then(data => {
+            appsData = data;
+        })
+        .catch(error => {
+            console.error('Error fetching app data:', error);
+        });
+</script>
+
+</body>
+</html>
